@@ -19,34 +19,23 @@ getFilteredMetrics target threshold = runConduitRes $
   .| filterC (filterMetric (T.pack target) threshold)
   .| sinkList
 
+-- | Helper to execute aggregation and print the result
+runAgg :: ( [Metric] -> a ) -> String -> String -> Double -> IO ()
+runAgg agg label target thresholdStr = do
+  let threshold = read thresholdStr :: Double
+  metrics <- getFilteredMetrics target threshold
+  putStrLn $ label ++ ": " ++ show (agg metrics)
+
 main :: IO ()
 main = do
   args <- getArgs
   case args of
-    ["avg", target, thresholdStr] -> do
-      let threshold = read thresholdStr :: Double
-      metrics <- getFilteredMetrics target threshold
-      putStrLn $ "Average: " ++ show (aggregateAvg metrics)
-    ["sum", target, thresholdStr] -> do
-      let threshold = read thresholdStr :: Double
-      metrics <- getFilteredMetrics target threshold
-      putStrLn $ "Sum: " ++ show (aggregateSum metrics)
-    ["count", target, thresholdStr] -> do
-      let threshold = read thresholdStr :: Double
-      metrics <- getFilteredMetrics target threshold
-      putStrLn $ "Count: " ++ show (aggregateCount metrics)
-    ["max", target, thresholdStr] -> do
-      let threshold = read thresholdStr :: Double
-      metrics <- getFilteredMetrics target threshold
-      putStrLn $ "Max: " ++ show (aggregateMax metrics)
-    ["min", target, thresholdStr] -> do
-      let threshold = read thresholdStr :: Double
-      metrics <- getFilteredMetrics target threshold
-      putStrLn $ "Min: " ++ show (aggregateMin metrics)
-    ["stddev", target, thresholdStr] -> do
-      let threshold = read thresholdStr :: Double
-      metrics <- getFilteredMetrics target threshold
-      putStrLn $ "StdDev: " ++ show (aggregateStdDev metrics)
+    ["avg", target, thresholdStr] -> runAgg aggregateAvg "Average" target thresholdStr
+    ["sum", target, thresholdStr] -> runAgg aggregateSum "Sum" target thresholdStr
+    ["count", target, thresholdStr] -> runAgg (show . aggregateCount) "Count" target thresholdStr
+    ["max", target, thresholdStr] -> runAgg aggregateMax "Max" target thresholdStr
+    ["min", target, thresholdStr] -> runAgg aggregateMin "Min" target thresholdStr
+    ["stddev", target, thresholdStr] -> runAgg aggregateStdDev "StdDev" target thresholdStr
     [target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
       runConduitRes $ 

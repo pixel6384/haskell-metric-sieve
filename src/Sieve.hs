@@ -8,13 +8,16 @@ data Metric = Metric
   , value :: Double
   } deriving (Show, Eq)
 
--- | Parses a line in format "metric_name=value"
+-- | Parses a line in format "metric_name=value", ignoring surrounding whitespace
 parseLine :: T.Text -> Maybe Metric
 parseLine line = 
   case T.splitOn "=" line of
-    [n, v] -> case reads (T.unpack v) of
-                 [(val, "")] -> Just $ Metric n val
-                 _            -> Nothing
+    [n, v] -> 
+      let cleanN = T.strip n
+          cleanV = T.unpack (T.strip v)
+      in case reads cleanV of
+           [(val, "")] -> Just $ Metric cleanN val
+           _            -> Nothing
     _      -> Nothing
 
 -- | Predicate to filter metrics by name and threshold
