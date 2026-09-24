@@ -17,7 +17,9 @@ main = do
   let testSum = aggregateSum filtered == 30.0
   let testCount = aggregateCount filtered == 2
   let testAvg = aggregateAvg filtered == 15.0
+  let testMax = aggregateMax filtered == 20.0
+  let testMin = aggregateMin filtered == 10.0
 
-  if testParsed && testSum && testCount && testAvg
+  if testParsed && testSum && testCount && testAvg && testMax && testMin
     then putStrLn "All Tests Passed" >> exitSuccess
     else putStrLn "Some Tests Failed" >> exitFailure

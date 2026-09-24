@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount) where
+module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin) where
 
 import qualified Data.Text as T
 import Data.Maybe (mapMaybe)
@@ -36,6 +36,16 @@ aggrAvg :: [Metric] -> Double
 aggrAvg [] = 0
 aggrAvg ms = aggrSum ms / fromIntegral (aggrCount ms)
 
+-- | Maximum value of filtered metrics
+aggrMax :: [Metric] -> Double
+aggrMax [] = 0
+aggrMax ms = maximum (map value ms)
+
+-- | Minimum value of filtered metrics
+aggrMin :: [Metric] -> Double
+aggrMin [] = 0
+aggrMin ms = minimum (map value ms)
+
 aggregateSum :: [Metric] -> Double
 aggregateSum = aggrSum
 
@@ -44,3 +54,9 @@ aggregateCount = aggrCount
 
 aggregateAvg :: [Metric] -> Double
 aggregateAvg = aggrAvg
+
+aggregateMax :: [Metric] -> Double
+aggregateMax = aggrMax
+
+aggregateMin :: [Metric] -> Double
+aggregateMin = aggrMin
