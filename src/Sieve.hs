@@ -2,7 +2,6 @@
 module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev) where
 
 import qualified Data.Text as T
-import Data.Maybe (mapMaybe)
 
 data Metric = Metric
   { name  :: T.Text
@@ -24,52 +23,34 @@ filterMetric targetName threshold m =
   name m == targetName && value m > threshold
 
 -- | Sum of filtered metrics
-aggrSum :: [Metric] -> Double
-aggrSum = sum . map value
+aggregateSum :: [Metric] -> Double
+aggregateSum = sum . map value
 
 -- | Count of filtered metrics
-aggrCount :: [Metric] -> Int
-aggrCount = length
+aggregateCount :: [Metric] -> Int
+aggregateCount = length
 
 -- | Average of filtered metrics
-aggrAvg :: [Metric] -> Double
-aggrAvg [] = 0
-aggrAvg ms = aggrSum ms / fromIntegral (aggrCount ms)
+aggregateAvg :: [Metric] -> Double
+aggregateAvg [] = 0
+aggregateAvg ms = aggregateSum ms / fromIntegral (aggregateCount ms)
 
 -- | Maximum value of filtered metrics
-aggrMax :: [Metric] -> Double
-aggrMax [] = 0
-aggrMax ms = maximum (map value ms)
+aggregateMax :: [Metric] -> Double
+aggregateMax [] = 0
+aggregateMax ms = maximum (map value ms)
 
 -- | Minimum value of filtered metrics
-aggrMin :: [Metric] -> Double
-aggrMin [] = 0
-aggrMin ms = minimum (map value ms)
+aggregateMin :: [Metric] -> Double
+aggregateMin [] = 0
+aggregateMin ms = minimum (map value ms)
 
 -- | Standard Deviation of filtered metrics
-aggrStdDev :: [Metric] -> Double
-aggrStdDev [] = 0
-aggrStdDev [_] = 0
-aggrStdDev ms = 
-  let values = map value ms
-      avg = aggrAvg ms
-      variance = sum [(v - avg)^2 | v <- values] / fromIntegral (length values)
-  in sqrt variance
-
-aggregateSum :: [Metric] -> Double
-aggregateSum = aggrSum
-
-aggregateCount :: [Metric] -> Int
-aggregateCount = aggrCount
-
-aggregateAvg :: [Metric] -> Double
-aggregateAvg = aggrAvg
-
-aggregateMax :: [Metric] -> Double
-aggregateMax = aggrMax
-
-aggregateMin :: [Metric] -> Double
-aggregateMin = aggrMin
-
 aggregateStdDev :: [Metric] -> Double
-aggregateStdDev = aggrStdDev
+aggregateStdDev [] = 0
+aggregateStdDev [_] = 0
+aggregateStdDev ms = 
+  let values = map value ms
+      avg = aggregateAvg ms
+      variance = sum [(v - avg)**2 | v <- values] / fromIntegral (length values)
+  in sqrt variance
