@@ -8,42 +8,32 @@ import qualified Data.Conduit.Text as CT
 import Sieve
 import Control.Monad.IO.Class (liftIO)
 
+-- | Helper to run the metric pipeline and return a list of matched metrics
+getFilteredMetrics :: String -> Double -> IO [Metric]
+getFilteredMetrics target threshold = runConduitRes $ 
+  CB.sourceHandle stdin
+  .| CT.decodeUtf8
+  .| CT.lines
+  .| mapC parseLine
+  .| concatMapC id
+  .| filterC (filterMetric (T.pack target) threshold)
+  .| sinkList
+
 main :: IO ()
 main = do
   args <- getArgs
   case args of
     ["avg", target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
-      metrics <- runConduitRes $ 
-        CB.sourceHandle stdin
-        .| CT.decodeUtf8
-        .| CT.lines
-        .| mapC parseLine
-        .| concatMapC id
-        .| filterC (filterMetric (T.pack target) threshold)
-        .| sinkList
+      metrics <- getFilteredMetrics target threshold
       putStrLn $ "Average: " ++ show (aggregateAvg metrics)
     ["sum", target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
-      metrics <- runConduitRes $ 
-        CB.sourceHandle stdin
-        .| CT.decodeUtf8
-        .| CT.lines
-        .| mapC parseLine
-        .| concatMapC id
-        .| filterC (filterMetric (T.pack target) threshold)
-        .| sinkList
+      metrics <- getFilteredMetrics target threshold
       putStrLn $ "Sum: " ++ show (aggregateSum metrics)
     ["count", target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
-      metrics <- runConduitRes $ 
-        CB.sourceHandle stdin
-        .| CT.decodeUtf8
-        .| CT.lines
-        .| mapC parseLine
-        .| concatMapC id
-        .| filterC (filterMetric (T.pack target) threshold)
-        .| sinkList
+      metrics <- getFilteredMetrics target threshold
       putStrLn $ "Count: " ++ show (aggregateCount metrics)
     [target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
