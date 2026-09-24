@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev) where
+module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian) where
 
 import qualified Data.Text as T
+import Data.List (sort)
 
 data Metric = Metric
   { name  :: T.Text
@@ -57,3 +58,14 @@ aggregateStdDev ms =
       avg = aggregateAvg ms
       variance = sum [(v - avg)**2 | v <- values] / fromIntegral (length values)
   in sqrt variance
+
+-- | Median value of filtered metrics
+aggregateMedian :: [Metric] -> Double
+aggregateMedian [] = 0
+aggregateMedian ms = 
+  let sorted = sort (map value ms)
+      len = length sorted
+      mid = len `div` 2
+  in if odd len
+     then sorted !! mid
+     else (sorted !! (mid - 1) + sorted !! mid) / 2
