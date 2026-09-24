@@ -43,6 +43,10 @@ main = do
       let threshold = read thresholdStr :: Double
       metrics <- getFilteredMetrics target threshold
       putStrLn $ "Min: " ++ show (aggregateMin metrics)
+    ["stddev", target, thresholdStr] -> do
+      let threshold = read thresholdStr :: Double
+      metrics <- getFilteredMetrics target threshold
+      putStrLn $ "StdDev: " ++ show (aggregateStdDev metrics)
     [target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
       runConduitRes $ 
@@ -59,4 +63,5 @@ main = do
   metric-sieve sum <metric_name> <threshold>
   metric-sieve count <metric_name> <threshold>
   metric-sieve max <metric_name> <threshold>
-  metric-sieve min <metric_name> <threshold"
+  metric-sieve min <metric_name> <threshold>
+  metric-sieve stddev <metric_name> <threshold"

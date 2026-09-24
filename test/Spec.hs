@@ -19,7 +19,10 @@ main = do
   let testAvg = aggregateAvg filtered == 15.0
   let testMax = aggregateMax filtered == 20.0
   let testMin = aggregateMin filtered == 10.0
+  
+  -- StdDev of [10, 20] is sqrt(((10-15)^2 + (20-15)^2)/2) = sqrt((25+25)/2) = sqrt(25) = 5.0
+  let testStdDev = aggregateStdDev filtered == 5.0
 
-  if testParsed && testSum && testCount && testAvg && testMax && testMin
+  if testParsed && testSum && testCount && testAvg && testMax && testMin && testStdDev
     then putStrLn "All Tests Passed" >> exitSuccess
     else putStrLn "Some Tests Failed" >> exitFailure
