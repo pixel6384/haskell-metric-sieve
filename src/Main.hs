@@ -22,7 +22,29 @@ main = do
         .| concatMapC id
         .| filterC (filterMetric (T.pack target) threshold)
         .| sinkList
-      putStrLn $ "Average: " ++ show (aggregateMetrics metrics)
+      putStrLn $ "Average: " ++ show (aggregateAvg metrics)
+    ["sum", target, thresholdStr] -> do
+      let threshold = read thresholdStr :: Double
+      metrics <- runConduitRes $ 
+        CB.sourceHandle stdin
+        .| CT.decodeUtf8
+        .| CT.lines
+        .| mapC parseLine
+        .| concatMapC id
+        .| filterC (filterMetric (T.pack target) threshold)
+        .| sinkList
+      putStrLn $ "Sum: " ++ show (aggregateSum metrics)
+    ["count", target, thresholdStr] -> do
+      let threshold = read thresholdStr :: Double
+      metrics <- runConduitRes $ 
+        CB.sourceHandle stdin
+        .| CT.decodeUtf8
+        .| CT.lines
+        .| mapC parseLine
+        .| concatMapC id
+        .| filterC (filterMetric (T.pack target) threshold)
+        .| sinkList
+      putStrLn $ "Count: " ++ show (aggregateCount metrics)
     [target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
       runConduitRes $ 
@@ -35,4 +57,6 @@ main = do
         .| mapM_C (liftIO . print)
     _ -> putStrLn "Usage:
   metric-sieve <metric_name> <threshold>
-  metric-sieve avg <metric_name> <threshold"
+  metric-sieve avg <metric_name> <threshold>
+  metric-sieve sum <metric_name> <threshold>
+  metric-sieve count <metric_name> <threshold"
