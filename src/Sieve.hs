@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile) where
+module Sieve (Metric(..), parseLine, filterMetric, filterMetricRange, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile) where
 
 import qualified Data.Text as T
 import Data.List (sort)
@@ -21,10 +21,15 @@ parseLine line =
            _            -> Nothing
     _      -> Nothing
 
--- | Predicate to filter metrics by name and threshold
+-- | Predicate to filter metrics by name and threshold (greater than)
 filterMetric :: T.Text -> Double -> Metric -> Bool
 filterMetric targetName threshold m = 
   name m == targetName && value m > threshold
+
+-- | Predicate to filter metrics by name and value range (inclusive)
+filterMetricRange :: T.Text -> Double -> Double -> Metric -> Bool
+filterMetricRange targetName low high m = 
+  name m == targetName && value m >= low && value m <= high
 
 -- | Sum of filtered metrics
 aggregateSum :: [Metric] -> Double
