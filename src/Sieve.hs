@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian) where
+module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95) where
 
 import qualified Data.Text as T
 import Data.List (sort)
@@ -69,3 +69,12 @@ aggregateMedian ms =
   in if odd len
      then sorted !! mid
      else (sorted !! (mid - 1) + sorted !! mid) / 2
+
+-- | 95th Percentile of filtered metrics
+aggregateP95 :: [Metric] -> Double
+aggregateP95 [] = 0
+aggregateP95 ms = 
+  let sorted = sort (map value ms)
+      len = length sorted
+      index = ceiling (0.95 * fromIntegral len) - 1
+  in sorted !! max 0 index

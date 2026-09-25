@@ -37,6 +37,7 @@ main = do
     ["min", target, thresholdStr] -> runAgg aggregateMin "Min" target thresholdStr
     ["stddev", target, thresholdStr] -> runAgg aggregateStdDev "StdDev" target thresholdStr
     ["median", target, thresholdStr] -> runAgg aggregateMedian "Median" target thresholdStr
+    ["p95", target, thresholdStr] -> runAgg aggregateP95 "P95" target thresholdStr
     [target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
       runConduitRes $ 
@@ -55,4 +56,5 @@ main = do
   metric-sieve max <metric_name> <threshold>
   metric-sieve min <metric_name> <threshold>
   metric-sieve stddev <metric_name> <threshold
-  metric-sieve median <metric_name> <threshold"
+  metric-sieve median <metric_name> <threshold
+  metric-sieve p95 <metric_name> <threshold"

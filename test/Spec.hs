@@ -23,6 +23,9 @@ main = do
   -- StdDev of [10, 20] is sqrt(((10-15)^2 + (20-15)^2)/2) = sqrt((25+25)/2) = sqrt(25) = 5.0
   let testStdDev = aggregateStdDev filtered == 5.0
 
-  if testParsed && testSum && testCount && testAvg && testMax && testMin && testStdDev
+  -- P95 of [10, 20] should be 20.0 (index = ceiling(0.95*2)-1 = 2-1 = 1)
+  let testP95 = aggregateP95 filtered == 20.0
+
+  if testParsed && testSum && testCount && testAvg && testMax && testMin && testStdDev && testP95
     then putStrLn "All Tests Passed" >> exitSuccess
     else putStrLn "Some Tests Failed" >> exitFailure
