@@ -51,6 +51,7 @@ main = do
   args <- getArgs
   case args of
     ["avg", target, thresholdStr] -> runAgg aggregateAvg "Average" target thresholdStr
+    ["wavg", target, thresholdStr] -> runAgg aggregateWeightedAvg "Weighted Average" target thresholdStr
     ["sum", target, thresholdStr] -> runAgg aggregateSum "Sum" target thresholdStr
     ["count", target, thresholdStr] -> runAgg (show . aggregateCount) "Count" target thresholdStr
     ["max", target, thresholdStr] -> runAgg aggregateMax "Max" target thresholdStr
@@ -93,6 +94,7 @@ main = do
   metric-sieve <metric_name> <threshold>
   metric-sieve <metric_name> <low> <high>
   metric-sieve avg <metric_name> <threshold>
+  metric-sieve wavg <metric_name> <threshold>
   metric-sieve avg <metric_name> <low> <high>
   metric-sieve sum <metric_name> <threshold>
   metric-sieve sum <metric_name> <low> <high>

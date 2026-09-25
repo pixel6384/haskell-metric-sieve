@@ -1,24 +1,32 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, filterMetricRange, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile) where
+module Sieve (Metric(..), parseLine, filterMetric, filterMetricRange, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile, aggregateWeightedAvg) where
 
 import qualified Data.Text as T
 import Data.List (sort)
 
 data Metric = Metric
-  { name  :: T.Text
-  , value :: Double
+  { name   :: T.Text
+  , value  :: Double
+  , weight :: Double
   } deriving (Show, Eq)
 
--- | Parses a line in format "metric_name=value", ignoring surrounding whitespace
+-- | Parses a line in format "metric_name=value" or "metric_name=value,weight", ignoring surrounding whitespace
 parseLine :: T.Text -> Maybe Metric
 parseLine line = 
   case T.splitOn "=" line of
-    [n, v] -> 
+    [n, vPart] -> 
       let cleanN = T.strip n
-          cleanV = T.unpack (T.strip v)
-      in case reads cleanV of
-           [(val, "")] -> Just $ Metric cleanN val
-           _            -> Nothing
+          vSplit = T.splitOn "," vPart
+      in case vSplit of
+           [vStr] -> 
+             case reads (T.unpack (T.strip vStr)) of
+               [(val, "")] -> Just $ Metric cleanN val 1.0
+               _            -> Nothing
+           [vStr, wStr] -> 
+             case (reads (T.unpack (T.strip vStr)), reads (T.unpack (T.strip wStr))) of
+               ([(val, "")], [(w, "")]) -> Just $ Metric cleanN val w
+               _                         -> Nothing
+           _ -> Nothing
     _      -> Nothing
 
 -- | Predicate to filter metrics by name and threshold (greater than)
@@ -43,6 +51,14 @@ aggregateCount = length
 aggregateAvg :: [Metric] -> Double
 aggregateAvg [] = 0
 aggregateAvg ms = aggregateSum ms / fromIntegral (aggregateCount ms)
+
+-- | Weighted Average of filtered metrics
+aggregateWeightedAvg :: [Metric] -> Double
+aggregateWeightedAvg [] = 0
+aggregateWeightedAvg ms = 
+  let weightedSum = sum [value m * weight m | m <- ms]
+      totalWeight = sum [weight m | m <- ms]
+  in if totalWeight == 0 then 0 else weightedSum / totalWeight
 
 -- | Maximum value of filtered metrics
 aggregateMax :: [Metric] -> Double
