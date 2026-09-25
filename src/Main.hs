@@ -38,6 +38,7 @@ main = do
     ["stddev", target, thresholdStr] -> runAgg aggregateStdDev "StdDev" target thresholdStr
     ["median", target, thresholdStr] -> runAgg aggregateMedian "Median" target thresholdStr
     ["p95", target, thresholdStr] -> runAgg aggregateP95 "P95" target thresholdStr
+    ["p99", target, thresholdStr] -> runAgg aggregateP99 "P99" target thresholdStr
     [target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
       runConduitRes $ 
@@ -55,6 +56,7 @@ main = do
   metric-sieve count <metric_name> <threshold>
   metric-sieve max <metric_name> <threshold>
   metric-sieve min <metric_name> <threshold>
-  metric-sieve stddev <metric_name> <threshold
-  metric-sieve median <metric_name> <threshold
-  metric-sieve p95 <metric_name> <threshold"
+  metric-sieve stddev <metric_name> <threshold>
+  metric-sieve median <metric_name> <threshold>
+  metric-sieve p95 <metric_name> <threshold>
+  metric-sieve p99 <metric_name> <threshold"
