@@ -7,6 +7,7 @@ import qualified Data.Conduit.Binary as CB
 import qualified Data.Conduit.Text as CT
 import Sieve
 import Control.Monad.IO.Class (liftIO)
+import Data.List (isPrefixOf)
 
 -- | Helper to run the metric pipeline and return a list of matched metrics
 getFilteredMetrics :: String -> Double -> IO [Metric]
@@ -20,7 +21,7 @@ getFilteredMetrics target threshold = runConduitRes $
   .| sinkList
 
 -- | Helper to execute aggregation and print the result
-runAgg :: ( [Metric] -> a ) -> String -> String -> Double -> IO ()
+runAgg :: ( [Metric] -> a ) -> String -> String -> String -> IO ()
 runAgg agg label target thresholdStr = do
   let threshold = read thresholdStr :: Double
   metrics <- getFilteredMetrics target threshold
@@ -39,6 +40,12 @@ main = do
     ["median", target, thresholdStr] -> runAgg aggregateMedian "Median" target thresholdStr
     ["p95", target, thresholdStr] -> runAgg aggregateP95 "P95" target thresholdStr
     ["p99", target, thresholdStr] -> runAgg aggregateP99 "P99" target thresholdStr
+    [op, target, thresholdStr] | "p" `isPrefixOf` op && length op > 1 -> 
+      case reads (drop 1 op) :: [(Double, String)] of
+        [(pVal, "")] -> 
+          let p = pVal / 100.0
+          in runAgg (aggregatePercentile p) ("P" ++ drop 1 op) target thresholdStr
+        _ -> putStrLn "Invalid percentile format. Use pXX (e.g. p75)"
     [target, thresholdStr] -> do
       let threshold = read thresholdStr :: Double
       runConduitRes $ 
@@ -58,5 +65,6 @@ main = do
   metric-sieve min <metric_name> <threshold>
   metric-sieve stddev <metric_name> <threshold>
   metric-sieve median <metric_name> <threshold>
+  metric-sieve p<XX> <metric_name> <threshold> (e.g. p95, p75)
   metric-sieve p95 <metric_name> <threshold>
   metric-sieve p99 <metric_name> <threshold"

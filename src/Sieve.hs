@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99) where
+module Sieve (Metric(..), parseLine, filterMetric, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile) where
 
 import qualified Data.Text as T
 import Data.List (sort)
@@ -59,6 +59,15 @@ aggregateStdDev ms =
       variance = sum [(v - avg)**2 | v <- values] / fromIntegral (length values)
   in sqrt variance
 
+-- | Generic percentile aggregation
+aggregatePercentile :: Double -> [Metric] -> Double
+aggregatePercentile _ [] = 0
+aggregatePercentile p ms = 
+  let sorted = sort (map value ms)
+      len = length sorted
+      index = ceiling (p * fromIntegral len) - 1
+  in sorted !! max 0 index
+
 -- | Median value of filtered metrics
 aggregateMedian :: [Metric] -> Double
 aggregateMedian [] = 0
@@ -72,18 +81,8 @@ aggregateMedian ms =
 
 -- | 95th Percentile of filtered metrics
 aggregateP95 :: [Metric] -> Double
-aggregateP95 [] = 0
-aggregateP95 ms = 
-  let sorted = sort (map value ms)
-      len = length sorted
-      index = ceiling (0.95 * fromIntegral len) - 1
-  in sorted !! max 0 index
+aggregateP95 = aggregatePercentile 0.95
 
 -- | 99th Percentile of filtered metrics
 aggregateP99 :: [Metric] -> Double
-aggregateP99 [] = 0
-aggregateP99 ms = 
-  let sorted = sort (map value ms)
-      len = length sorted
-      index = ceiling (0.99 * fromIntegral len) - 1
-  in sorted !! max 0 index
+aggregateP99 = aggregatePercentile 0.99
