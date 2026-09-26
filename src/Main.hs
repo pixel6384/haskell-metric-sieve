@@ -66,6 +66,8 @@ main = do
     ["min", target, low, high] -> runAggRange aggregateMin "Min" target low high
     ["stddev", target, thresholdStr] -> runAgg aggregateStdDev "StdDev" target thresholdStr
     ["stddev", target, low, high] -> runAggRange aggregateStdDev "StdDev" target low high
+    ["var", target, thresholdStr] -> runAgg aggregateVariance "Variance" target thresholdStr
+    ["var", target, low, high] -> runAggRange aggregateVariance "Variance" target low high
     ["median", target, thresholdStr] -> runAgg aggregateMedian "Median" target thresholdStr
     ["median", target, low, high] -> runAggRange aggregateMedian "Median" target low high
     ["p95", target, thresholdStr] -> runAgg aggregateP95 "P95" target thresholdStr
@@ -118,6 +120,8 @@ main = do
   metric-sieve min <metric_name> <low> <high>
   metric-sieve stddev <metric_name> <threshold>
   metric-sieve stddev <metric_name> <low> <high>
+  metric-sieve var <metric_name> <threshold>
+  metric-sieve var <metric_name> <low> <high>
   metric-sieve median <metric_name> <threshold>
   metric-sieve median <metric_name> <low> <high>
   metric-sieve p<XX> <metric_name> <threshold> (e.g. p95, p75)

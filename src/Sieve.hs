@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, filterMetricRange, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile, aggregateWeightedAvg, aggregateWeightedSum) where
+module Sieve (Metric(..), parseLine, filterMetric, filterMetricRange, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateVariance, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile, aggregateWeightedAvg, aggregateWeightedSum) where
 
 import qualified Data.Text as T
 import Data.List (sort)
@@ -74,15 +74,18 @@ aggregateMin :: [Metric] -> Double
 aggregateMin [] = 0
 aggregateMin ms = minimum (map value ms)
 
--- | Standard Deviation of filtered metrics
-aggregateStdDev :: [Metric] -> Double
-aggregateStdDev [] = 0
-aggregateStdDev [_] = 0
-aggregateStdDev ms = 
+-- | Variance of filtered metrics
+aggregateVariance :: [Metric] -> Double
+aggregateVariance [] = 0
+aggregateVariance [_] = 0
+aggregateVariance ms = 
   let values = map value ms
       avg = aggregateAvg ms
-      variance = sum [(v - avg)**2 | v <- values] / fromIntegral (length values)
-  in sqrt variance
+  in sum [(v - avg)**2 | v <- values] / fromIntegral (length values)
+
+-- | Standard Deviation of filtered metrics
+aggregateStdDev :: [Metric] -> Double
+aggregateStdDev ms = sqrt (aggregateVariance ms)
 
 -- | Generic percentile aggregation
 aggregatePercentile :: Double -> [Metric] -> Double

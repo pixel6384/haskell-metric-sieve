@@ -28,12 +28,14 @@ main = do
   let testMax = aggregateMax filtered == 20.0
   let testMin = aggregateMin filtered == 10.0
   
-  -- StdDev of [10, 20] is sqrt(((10-15)^2 + (20-15)^2)/2) = sqrt((25+25)/2) = sqrt(25) = 5.0
+  -- Variance of [10, 20] is ((10-15)^2 + (20-15)^2)/2 = (25+25)/2 = 25.0
+  let testVariance = aggregateVariance filtered == 25.0
+  -- StdDev of [10, 20] is sqrt(25.0) = 5.0
   let testStdDev = aggregateStdDev filtered == 5.0
 
   -- P95 of [10, 20] should be 20.0 (index = ceiling(0.95*2)-1 = 2-1 = 1)
   let testP95 = aggregateP95 filtered == 20.0
 
-  if testParsed && testParsedW && testSum && testWeightedSum && testCount && testAvg && testWeightedAvg && testMax && testMin && testStdDev && testP95
+  if testParsed && testParsedW && testSum && testWeightedSum && testCount && testAvg && testWeightedAvg && testMax && testMin && testVariance && testStdDev && testP95
     then putStrLn "All Tests Passed" >> exitSuccess
     else putStrLn "Some Tests Failed" >> exitFailure
