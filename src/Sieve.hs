@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Sieve (Metric(..), parseLine, filterMetric, filterMetricRange, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile, aggregateWeightedAvg) where
+module Sieve (Metric(..), parseLine, filterMetric, filterMetricRange, aggregateAvg, aggregateSum, aggregateCount, aggregateMax, aggregateMin, aggregateStdDev, aggregateMedian, aggregateP95, aggregateP99, aggregatePercentile, aggregateWeightedAvg, aggregateWeightedSum) where
 
 import qualified Data.Text as T
 import Data.List (sort)
@@ -43,6 +43,10 @@ filterMetricRange targetName low high m =
 aggregateSum :: [Metric] -> Double
 aggregateSum = sum . map value
 
+-- | Weighted Sum of filtered metrics
+aggregateWeightedSum :: [Metric] -> Double
+aggregateWeightedSum ms = sum [value m * weight m | m <- ms]
+
 -- | Count of filtered metrics
 aggregateCount :: [Metric] -> Int
 aggregateCount = length
@@ -56,7 +60,7 @@ aggregateAvg ms = aggregateSum ms / fromIntegral (aggregateCount ms)
 aggregateWeightedAvg :: [Metric] -> Double
 aggregateWeightedAvg [] = 0
 aggregateWeightedAvg ms = 
-  let weightedSum = sum [value m * weight m | m <- ms]
+  let weightedSum = aggregateWeightedSum ms
       totalWeight = sum [weight m | m <- ms]
   in if totalWeight == 0 then 0 else weightedSum / totalWeight
 

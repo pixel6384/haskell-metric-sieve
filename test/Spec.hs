@@ -21,6 +21,7 @@ main = do
   let filtered = filter (filterMetric "cpu" 5.0) sampleMetrics
 
   let testSum = aggregateSum filtered == 30.0
+  let testWeightedSum = aggregateWeightedSum filtered == (10.0*1.0 + 20.0*2.0)
   let testCount = aggregateCount filtered == 2
   let testAvg = aggregateAvg filtered == 15.0
   let testWeightedAvg = aggregateWeightedAvg filtered == (10.0*1.0 + 20.0*2.0) / 3.0
@@ -33,6 +34,6 @@ main = do
   -- P95 of [10, 20] should be 20.0 (index = ceiling(0.95*2)-1 = 2-1 = 1)
   let testP95 = aggregateP95 filtered == 20.0
 
-  if testParsed && testParsedW && testSum && testCount && testAvg && testWeightedAvg && testMax && testMin && testStdDev && testP95
+  if testParsed && testParsedW && testSum && testWeightedSum && testCount && testAvg && testWeightedAvg && testMax && testMin && testStdDev && testP95
     then putStrLn "All Tests Passed" >> exitSuccess
     else putStrLn "Some Tests Failed" >> exitFailure
